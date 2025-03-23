@@ -1,0 +1,5 @@
+version: 1.2
+workflows:
+ - name: BaseSpace_Fetcher_Reads
+   subclass: WDL
+   primaryDescriptorPath: /nm_cc_and_mendevar.wdl
