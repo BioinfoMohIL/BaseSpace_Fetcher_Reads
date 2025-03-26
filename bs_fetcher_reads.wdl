@@ -178,12 +178,13 @@ workflow basespace_fetch {
       access_token = access_token
   }
 
-  call version_capture {
-    input:
-  }
+  # call version_capture {
+  #   input:
+  # }
+
   output {
-    String basespace_fetch_version = version_capture.phb_version
-    String basespace_fetch_analysis_date = version_capture.date
+    # String basespace_fetch_version = version_capture.phb_version
+    # String basespace_fetch_analysis_date = version_capture.date
     
     File read1 = fetch_bs.read1
     File? read2 = fetch_bs.read2
