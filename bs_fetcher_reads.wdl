@@ -147,8 +147,8 @@ task fetch_bs {
     String r2 = read_string("rev_read_name.txt")
     File read1  = r1
     File? read2 = r2
-    File read1_s  = "~{sample_name}_R1.fq.gz"
-    File? read2_s = "~{sample_name}_R2.fq.gz"
+    File read1_s  = "~{sample_name}_R1.fastq.gz"
+    File? read2_s = "~{sample_name}_R2.fastq.gz"
     Float fwd_file_size = read_float("fwd_size.txt")
     Float rev_file_size = read_float("rev_size.txt")
 
@@ -167,18 +167,18 @@ task fetch_bs {
 
 workflow basespace_fetch {
   input {
-    String sample_name 
-    String basespace_sample_name
-    String? basespace_sample_id   
-    String basespace_collection_id 
-    String api_server
-    String access_token
-    # String sample_name =  "CB565"
-    # String basespace_sample_name = "CB565"
+    # String sample_name 
+    # String basespace_sample_name
     # String? basespace_sample_id   
-    # String basespace_collection_id = "N_019"
-    # String api_server = "https://api.basespace.illumina.com"
-    # String access_token = "4acb4557c76940d99ed57dfd3212d423"
+    # String basespace_collection_id 
+    # String api_server
+    # String access_token
+    String sample_name =  "CB565"
+    String basespace_sample_name = "CB565"
+    String? basespace_sample_id   
+    String basespace_collection_id = "N_019"
+    String api_server = "https://api.basespace.illumina.com"
+    String access_token = "4acb4557c76940d99ed57dfd3212d423"
   }
 
   call fetch_bs {
@@ -198,8 +198,8 @@ workflow basespace_fetch {
     # String basespace_fetch_version = version_capture.phb_version
     # String basespace_fetch_analysis_date = version_capture.date
     
-    File read1 = fetch_bs.read1
-    File? read2 = fetch_bs.read2
+    File read1    = fetch_bs.read1
+    File? read2   = fetch_bs.read2
     File read1_s  = fetch_bs.read1_s
     File? read2_s = fetch_bs.read2_s
 
