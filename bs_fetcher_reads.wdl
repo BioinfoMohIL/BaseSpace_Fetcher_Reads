@@ -37,6 +37,7 @@ task fetch_bs {
     String basespace_collection_id
     String api_server 
     String access_token 
+  
 
     
     Int memory = 8
@@ -116,7 +117,6 @@ task fetch_bs {
         
         echo "cat fwd reads: cat $fwd_read >> $fwd_read_name" 
         cat $fwd_read >> ${fwd_read_name}
-        cat $fwd_read >> ~{sample_name}_R1.fastq.gz
 
         lane_count=$((lane_count+1))
       fi
@@ -131,11 +131,8 @@ task fetch_bs {
         rev_file_size_mb=$(awk -v size="$rev_file_size" 'BEGIN {printf "%.2f", size / (1024*1024)}')
         echo $rev_file_size_mb > rev_size.txt
 
-        
         echo "cat rev reads: cat $rev_read >> $rev_read_name" 
-        
         cat $rev_read >> ${rev_read_name}
-        cat $rev_read >> ~{sample_name}_R2.fastq.gz
 
       fi
     done
@@ -145,8 +142,8 @@ task fetch_bs {
   output {
     String r1 = read_string("fwd_read_name.txt")
     String r2 = read_string("rev_read_name.txt")
-    File read1  = "~{r1}"
-    File? read2 = "~{r2}"
+    File read1  = r1
+    File? read2 = r2
     
     Float fwd_file_size = read_float("fwd_size.txt")
     Float rev_file_size = read_float("rev_size.txt")
@@ -172,7 +169,7 @@ workflow basespace_fetch {
     String basespace_collection_id 
     String api_server
     String access_token
-
+  
   }
 
   call fetch_bs {
@@ -199,3 +196,4 @@ workflow basespace_fetch {
     Float read2_file_size_MB = fetch_bs.rev_file_size
   }
 }
+
