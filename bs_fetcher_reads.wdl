@@ -198,6 +198,8 @@ workflow basespace_fetch {
     
     File read1 = fetch_bs.read1
     File? read2 = fetch_bs.read2
+    File read1_s  = fetch_bs.read1_s
+    File? read2_s = fetch_bs.read2_s
 
     Float read1_file_size_MB = fetch_bs.fwd_file_size
     Float read2_file_size_MB = fetch_bs.rev_file_size
