@@ -145,10 +145,10 @@ task fetch_bs {
   output {
     String r1 = read_string("fwd_read_name.txt")
     String r2 = read_string("rev_read_name.txt")
-    File read1  = "NM254_S121_L001_R1_001.fastq.gz"
+    File read1  = "~{r1}"
+    File? read2 = "~{r2}"
     File? read2 = "NM254_S121_L001_R2_001.fastq.gz"
-    File read1_s  = "~{sample_name}_R1.fastq.gz"
-    File? read2_s = "~{sample_name}_R2.fastq.gz"
+    
     Float fwd_file_size = read_float("fwd_size.txt")
     Float rev_file_size = read_float("rev_size.txt")
 
@@ -195,8 +195,6 @@ workflow basespace_fetch {
     
     File read1    = fetch_bs.read1
     File? read2   = fetch_bs.read2
-    File read1_s  = fetch_bs.read1_s
-    File? read2_s = fetch_bs.read2_s
 
     Float read1_file_size_MB = fetch_bs.fwd_file_size
     Float read2_file_size_MB = fetch_bs.rev_file_size
