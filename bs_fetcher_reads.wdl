@@ -117,7 +117,7 @@ task fetch_bs {
         echo $fwd_file_size_mb > fwd_size.txt
         
         echo "cat fwd reads: cat $fwd_read >> $fwd_read_name" 
-        cat $fwd_read >> ~{sample_name}_R1.fastq.gz
+        cat $fwd_read >> $fwd_read_name
         lane_count=$((lane_count+1))
       fi
     done
@@ -133,17 +133,17 @@ task fetch_bs {
 
         
         echo "cat rev reads: cat $rev_read >> $rev_read_name" 
-        cat $rev_read >> ~{sample_name}_R2.fastq.gz
+        cat $rev_read >> $rev_read_name
       fi
     done
     echo "Lane Count: ${lane_count}"
 
   >>>
   output {
-    # File read1  = read_string("fwd_read_name.txt")
-    # File? read2 = read_string("rev_read_name.txt")
-    File read1  = "~{sample_name}_R1.fastq.gz"
-    File? read2 = "~{sample_name}_R2.fastq.gz"
+    File read1  = read_string("fwd_read_name.txt")
+    File? read2 = read_string("rev_read_name.txt")
+    # File read1  = "~{sample_name}_R1.fastq.gz"
+    # File? read2 = "~{sample_name}_R2.fastq.gz"
 
     Float fwd_file_size = read_float("fwd_size.txt")
     Float rev_file_size = read_float("rev_size.txt")
