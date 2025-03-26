@@ -143,8 +143,10 @@ task fetch_bs {
 
   >>>
   output {
-    File read1  = read_string("fwd_read_name.txt")
-    File? read2 = read_string("rev_read_name.txt")
+    String r1 = read_string("fwd_read_name.txt")
+    String r2 = read_string("rev_read_name.txt")
+    File read1  = r1
+    File? read2 = r2
     File read1_s  = "~{sample_name}_R1.fq.gz"
     File? read2_s = "~{sample_name}_R2.fq.gz"
     Float fwd_file_size = read_float("fwd_size.txt")
