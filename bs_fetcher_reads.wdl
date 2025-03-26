@@ -140,8 +140,11 @@ task fetch_bs {
 
   >>>
   output {
-    File read1  = read_string("fwd_read_name.txt")
-    File? read2 = read_string("rev_read_name.txt")
+    # File read1  = read_string("fwd_read_name.txt")
+    # File? read2 = read_string("rev_read_name.txt")
+    File read1  = "~{sample_name}_R1.fastq.gz"
+    File? read2 = "~{sample_name}_R2.fastq.gz"
+
     Float fwd_file_size = read_float("fwd_size.txt")
     Float rev_file_size = read_float("rev_size.txt")
 
