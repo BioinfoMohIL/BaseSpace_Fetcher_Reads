@@ -147,7 +147,6 @@ task fetch_bs {
     String r2 = read_string("rev_read_name.txt")
     File read1  = "~{r1}"
     File? read2 = "~{r2}"
-    File? read2 = "NM254_S121_L001_R2_001.fastq.gz"
     
     Float fwd_file_size = read_float("fwd_size.txt")
     Float rev_file_size = read_float("rev_size.txt")
