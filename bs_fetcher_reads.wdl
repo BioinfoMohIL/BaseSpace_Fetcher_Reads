@@ -106,11 +106,13 @@ task fetch_bs {
     echo -n "" > fwd_sizes.txt
     echo -n "" > rev_sizes.txt
     lane_count=0
+    
     for fwd_read in ./dataset_*/${SAMPLENAME_HYPHEN_INSTEAD_OF_UNDERSCORES}_*R1_*.fastq.gz; do
       if [[ -s $fwd_read ]]; then
+        fwd_read_name=$fwd_read
         fwd_file_size=$(stat -c%s "$fwd_read")
         echo $fwd_file_size > fwd_size.txt
-        echo "cat fwd reads: cat $fwd_read >> ~{sample_name}_R1.fastq.gz" 
+        echo "cat fwd reads: cat $fwd_read >> $fwd_read_name" 
         cat $fwd_read >> ~{sample_name}_R1.fastq.gz
         lane_count=$((lane_count+1))
       fi
@@ -118,9 +120,10 @@ task fetch_bs {
     ##REV Read
     for rev_read in ./dataset_*/${SAMPLENAME_HYPHEN_INSTEAD_OF_UNDERSCORES}_*R2_*.fastq.gz; do
       if [[ -s $rev_read ]]; then 
+        rev_read_name=$rev_read
         rev_file_size=$(stat -c%s "$rev_read")
         echo $rev_file_size > rev_size.txt
-        echo "cat rev reads: cat $rev_read >> ~{sample_name}_R2.fastq.gz" 
+        echo "cat rev reads: cat $rev_read >> $rev_read_name" 
         cat $rev_read >> ~{sample_name}_R2.fastq.gz
       fi
     done
