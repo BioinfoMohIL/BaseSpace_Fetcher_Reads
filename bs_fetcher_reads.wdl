@@ -188,7 +188,7 @@ workflow basespace_fetch {
     File read1 = fetch_bs.read1
     File? read2 = fetch_bs.read2
 
-    String read1_file_size = fetch_bs.fwd_file_size
-    String read2_file_size = fetch_bs.rev_file_size
+    String read1_file_size_MB = fetch_bs.fwd_file_size
+    String read2_file_size_MB = fetch_bs.rev_file_size
   }
 }
