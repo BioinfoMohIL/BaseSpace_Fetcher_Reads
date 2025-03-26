@@ -113,7 +113,8 @@ task fetch_bs {
         echo $fwd_read_name > fwd_read_name.txt
 
         fwd_file_size=$(stat -c%s "$fwd_read")
-        echo $fwd_file_size > fwd_size.txt
+        fwd_file_size_mb=$(awk -v size="$fwd_file_size" 'BEGIN {printf "%.2f", size / (1024*1024)}')
+        echo $fwd_file_size_mb > fwd_size.txt
         
         echo "cat fwd reads: cat $fwd_read >> $fwd_read_name" 
         cat $fwd_read >> $fwd_read_name
@@ -127,7 +128,9 @@ task fetch_bs {
         echo $rev_read_name > rev_read_name.txt
         
         rev_file_size=$(stat -c%s "$rev_read")
-        echo $rev_file_size > rev_size.txt
+        rev_file_size_mb=$(awk -v size="$rev_file_size" 'BEGIN {printf "%.2f", size / (1024*1024)}')
+        echo $rev_file_size_mb > rev_size.txt
+
         
         echo "cat rev reads: cat $rev_read >> $rev_read_name" 
         cat $rev_read >> $rev_read_name
