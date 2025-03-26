@@ -104,8 +104,6 @@ task fetch_bs {
 
     #Combine non-empty read files into single file without BaseSpace filename cruft
     ##FWD Read
-    echo -n "" > fwd_sizes.txt
-    echo -n "" > rev_sizes.txt
     lane_count=0
     for fwd_read in ./dataset_*/${SAMPLENAME_HYPHEN_INSTEAD_OF_UNDERSCORES}_*R1_*.fastq.gz; do
       if [[ -s $fwd_read ]]; then
@@ -117,7 +115,9 @@ task fetch_bs {
         echo $fwd_file_size_mb > fwd_size.txt
         
         echo "cat fwd reads: cat $fwd_read >> $fwd_read_name" 
-        cat $fwd_read >> $fwd_read_name
+        cat $fwd_read >> ${fwd_read_name}
+        cat $fwd_read >> ~{sample_name}_R1.fastq.gz
+
         lane_count=$((lane_count+1))
       fi
     done
@@ -133,7 +133,10 @@ task fetch_bs {
 
         
         echo "cat rev reads: cat $rev_read >> $rev_read_name" 
-        cat $rev_read >> $rev_read_name
+        
+        cat $rev_read >> ${rev_read_name}
+        cat $rev_read >> ~{sample_name}_R2.fastq.gz
+
       fi
     done
     echo "Lane Count: ${lane_count}"
@@ -142,9 +145,8 @@ task fetch_bs {
   output {
     File read1  = read_string("fwd_read_name.txt")
     File? read2 = read_string("rev_read_name.txt")
-    # File read1  = "~{sample_name}_R1.fastq.gz"
-    # File? read2 = "~{sample_name}_R2.fastq.gz"
-
+    File read1_s  = "~{sample_name}_R1.fq.gz"
+    File? read2_s = "~{sample_name}_R2.fq.gz"
     Float fwd_file_size = read_float("fwd_size.txt")
     Float rev_file_size = read_float("rev_size.txt")
 
@@ -166,9 +168,15 @@ workflow basespace_fetch {
     String sample_name 
     String basespace_sample_name
     String? basespace_sample_id   
-    String basespace_collection_id
+    String basespace_collection_id 
     String api_server
     String access_token
+    # String sample_name =  "CB565"
+    # String basespace_sample_name = "CB565"
+    # String? basespace_sample_id   
+    # String basespace_collection_id = "N_019"
+    # String api_server = "https://api.basespace.illumina.com"
+    # String access_token = "4acb4557c76940d99ed57dfd3212d423"
   }
 
   call fetch_bs {
