@@ -31,12 +31,13 @@ task version_capture {
 
 task fetch_bs {
   input {
-    String sample_name
+    String sample_name 
     String basespace_sample_name
-    String? basespace_sample_id
+    String? basespace_sample_id   
     String basespace_collection_id
-    String api_server
-    String access_token
+    String api_server 
+    String access_token 
+
     
     Int memory = 8
     Int cpu = 2
@@ -106,33 +107,38 @@ task fetch_bs {
     echo -n "" > fwd_sizes.txt
     echo -n "" > rev_sizes.txt
     lane_count=0
-    
     for fwd_read in ./dataset_*/${SAMPLENAME_HYPHEN_INSTEAD_OF_UNDERSCORES}_*R1_*.fastq.gz; do
       if [[ -s $fwd_read ]]; then
-        fwd_read_name=$fwd_read
+        fwd_read_name=$(basename "$fwd_read") # Fetch the complete name
+        echo $fwd_read_name > fwd_read_name.txt
+
         fwd_file_size=$(stat -c%s "$fwd_read")
         echo $fwd_file_size > fwd_size.txt
+        
         echo "cat fwd reads: cat $fwd_read >> $fwd_read_name" 
-        cat $fwd_read >> ~{sample_name}_R1.fastq.gz
+        cat $fwd_read >> $fwd_read_name
         lane_count=$((lane_count+1))
       fi
     done
     ##REV Read
     for rev_read in ./dataset_*/${SAMPLENAME_HYPHEN_INSTEAD_OF_UNDERSCORES}_*R2_*.fastq.gz; do
       if [[ -s $rev_read ]]; then 
-        rev_read_name=$rev_read
+        rev_read_name=$(basename "$rev_read")   # Fetch the complete name
+        echo $rev_read_name > rev_read_name.txt
+        
         rev_file_size=$(stat -c%s "$rev_read")
         echo $rev_file_size > rev_size.txt
+        
         echo "cat rev reads: cat $rev_read >> $rev_read_name" 
-        cat $rev_read >> ~{sample_name}_R2.fastq.gz
+        cat $rev_read >> $rev_read_name
       fi
     done
     echo "Lane Count: ${lane_count}"
 
   >>>
   output {
-    File read1 = "~{sample_name}_R1.fastq.gz"
-    File? read2 = "~{sample_name}_R2.fastq.gz"
+    File read1  = read_string("fwd_read_name.txt")
+    File? read2 = read_string("rev_read_name.txt")
     String fwd_file_size = read_string("fwd_size.txt")
     String rev_file_size = read_string("rev_size.txt")
 
@@ -151,11 +157,11 @@ task fetch_bs {
 
 workflow basespace_fetch {
   input {
-    String sample_name
-    String basespace_sample_name 
-    String? basespace_sample_id
-    String basespace_collection_id 
-    String api_server 
+    String sample_name 
+    String basespace_sample_name
+    String? basespace_sample_id   
+    String basespace_collection_id
+    String api_server
     String access_token
   }
 
