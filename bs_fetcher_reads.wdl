@@ -117,7 +117,7 @@ task fetch_bs {
         echo $fwd_file_size_mb > fwd_size.txt
         
         echo "cat fwd reads: cat $fwd_read >> $fwd_read_name" 
-        cat $fwd_read >> $fwd_read_name
+        cat $fwd_read >> ~{sample_name}_R1.fastq.gz
         lane_count=$((lane_count+1))
       fi
     done
@@ -133,7 +133,7 @@ task fetch_bs {
 
         
         echo "cat rev reads: cat $rev_read >> $rev_read_name" 
-        cat $rev_read >> $rev_read_name
+        cat $rev_read >> ~{sample_name}_R2.fastq.gz
       fi
     done
     echo "Lane Count: ${lane_count}"
@@ -160,12 +160,12 @@ task fetch_bs {
 
 workflow basespace_fetch {
   input {
-    String sample_name 
-    String basespace_sample_name
+    String sample_name =  "CB565"
+    String basespace_sample_name = "CB565"
     String? basespace_sample_id   
-    String basespace_collection_id
-    String api_server
-    String access_token
+    String basespace_collection_id = "N_019"
+    String api_server = "https://api.basespace.illumina.com"
+    String access_token = "4acb4557c76940d99ed57dfd3212d423"
   }
 
   call fetch_bs {
@@ -188,7 +188,7 @@ workflow basespace_fetch {
     File read1 = fetch_bs.read1
     File? read2 = fetch_bs.read2
 
-    Float read1_file_size_MB = fetch_bs.fwd_file_size
-    Float read2_file_size_MB = fetch_bs.rev_file_size
+    Float read1_file_size = fetch_bs.fwd_file_size
+    Float read2_file_size = fetch_bs.rev_file_size
   }
 }
