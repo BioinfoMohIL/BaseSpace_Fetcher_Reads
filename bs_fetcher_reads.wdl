@@ -142,8 +142,8 @@ task fetch_bs {
   output {
     File read1  = read_string("fwd_read_name.txt")
     File? read2 = read_string("rev_read_name.txt")
-    String fwd_file_size = read_string("fwd_size.txt")
-    String rev_file_size = read_string("rev_size.txt")
+    Float fwd_file_size = read_float("fwd_size.txt")
+    Float rev_file_size = read_float("rev_size.txt")
 
   }
 
@@ -181,7 +181,6 @@ workflow basespace_fetch {
   # call version_capture {
   #   input:
   # }
-
   output {
     # String basespace_fetch_version = version_capture.phb_version
     # String basespace_fetch_analysis_date = version_capture.date
@@ -189,7 +188,7 @@ workflow basespace_fetch {
     File read1 = fetch_bs.read1
     File? read2 = fetch_bs.read2
 
-    String read1_file_size_MB = fetch_bs.fwd_file_size
-    String read2_file_size_MB = fetch_bs.rev_file_size
+    Float read1_file_size = fetch_bs.fwd_file_size
+    Float read2_file_size = fetch_bs.rev_file_size
   }
 }
