@@ -1,6 +1,5 @@
 version 1.0
 
-
 task version_capture {
   input {
     String? timezone
@@ -29,7 +28,47 @@ task version_capture {
   }
 }
 
-task fetch_bs {
+task GetReadsName {
+    input {
+        String basespace_sample_name
+        String? basespace_sample_id   
+        String basespace_collection_id
+        String api_server 
+        String access_token
+     
+        String docker = "us-docker.pkg.dev/general-theiagen/theiagen/basespace_cli:1.2.1"
+
+    }
+
+    command <<<
+        read1=""
+        read2=""
+
+        bs project content --name N_019 \
+            --api-server=~{api_server} \
+            --access-token=~{access_token} \
+            --retry > fastq_list.txt
+
+        read1=$(grep "${sample_name}.*_R1_" fastq_list.txt | awk -F'|' '{gsub(/^[ \t]+|[ \t]+$/, "", $3); print $3}' | head -n 1)
+        read2=$(grep "${sample_name}.*_R2_" fastq_list.txt | awk -F'|' '{gsub(/^[ \t]+|[ \t]+$/, "", $3); print $3}' | head -n 1)
+
+        echo $read1 > 'read1.txt' 
+        echo $read2 > 'read2.txt' 
+    >>>
+
+    output {
+        String read1_whole_name = read_string('read1.txt') 
+        String read2_whole_name = read_string('read2.txt')  
+    }
+
+    runtime {
+        docker: docker
+        preemptible: 1
+  }
+}
+
+
+task ImportReadsFromBS {
   input {
     String sample_name 
     String basespace_sample_name
@@ -161,43 +200,50 @@ task fetch_bs {
 }
 
 
-workflow basespace_fetch {
-  input {
-    String sample_name 
-    String basespace_sample_name
-    String? basespace_sample_id   
-    String basespace_collection_id 
-    String api_server
-    String access_token
-    String read1_name
-    String read2_name
-  
-  }
 
-  call fetch_bs {
-    input:
-      sample_name = sample_name,
-      basespace_sample_id = basespace_sample_id,
-      basespace_sample_name = basespace_sample_name,
-      basespace_collection_id = basespace_collection_id,
-      api_server = api_server,
-      access_token = access_token,
-      read1_name = read1_name,
-      read2_name = read2_name
-  }
+workflow FetchReads {
+    input {
+        String sample_name =  "CB565"
+        String basespace_sample_name =  "CB565"
+        String basespace_collection_id = "N_019"
+        String api_server = "https://api.basespace.illumina.com"
+        String access_token = "4acb4557c76940d99ed57dfd3212d423"
+
+    }
+
+    call GetReadsName {
+        input:
+            basespace_collection_id = basespace_collection_id,
+            access_token = access_token,
+            api_server = api_server,
+            basespace_sample_name = basespace_sample_name
+    }
+
+    call ImportReadsFromBS {
+        input:
+            sample_name = sample_name,
+            basespace_sample_name = basespace_sample_name,
+            basespace_collection_id = basespace_collection_id,
+            api_server = api_server,
+            access_token = access_token,
+            read1_name = GetReadsName.read1_whole_name,
+            read2_name = GetReadsName.read1_whole_name
+    }
 
   # call version_capture {
   #   input:
   # }
-  output {
-    # String basespace_fetch_version = version_capture.phb_version
-    # String basespace_fetch_analysis_date = version_capture.date
-    
-    File read1    = fetch_bs.read1
-    File? read2   = fetch_bs.read2
+    output {
+        # String basespace_fetch_version = version_capture.phb_version
+        # String basespace_fetch_analysis_date = version_capture.date
+        
+        File read1    = ImportReadsFromBS.read1
+        File? read2   = ImportReadsFromBS.read2
 
-    Float read1_file_size_MB = fetch_bs.fwd_file_size
-    Float read2_file_size_MB = fetch_bs.rev_file_size
-  }
+        Float read1_file_size_MB = ImportReadsFromBS.fwd_file_size
+        Float read2_file_size_MB = ImportReadsFromBS.rev_file_size
+
+    }
+
+  
 }
-
