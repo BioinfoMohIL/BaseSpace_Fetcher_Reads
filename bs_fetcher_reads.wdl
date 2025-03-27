@@ -181,8 +181,8 @@ workflow basespace_fetch {
       basespace_sample_name = basespace_sample_name,
       basespace_collection_id = basespace_collection_id,
       api_server = api_server,
-      access_token = access_token
-      read1_name = read1_name
+      access_token = access_token,
+      read1_name = read1_name,
       read2_name = read2_name
   }
 
