@@ -37,6 +37,8 @@ task fetch_bs {
     String basespace_collection_id
     String api_server 
     String access_token 
+    String read1_name
+    String read2_name
   
 
     
@@ -115,8 +117,8 @@ task fetch_bs {
         fwd_file_size_mb=$(awk -v size="$fwd_file_size" 'BEGIN {printf "%.2f", size / (1024*1024)}')
         echo $fwd_file_size_mb > fwd_size.txt
         
-        echo "cat fwd reads: cat $fwd_read >> $fwd_read_name" 
-        cat $fwd_read >> ${fwd_read_name}
+        echo "cat fwd reads: cat $fwd_read >> ~{read1_name}" 
+        cat $fwd_read >> ~{read1_name}
 
         lane_count=$((lane_count+1))
       fi
@@ -131,8 +133,8 @@ task fetch_bs {
         rev_file_size_mb=$(awk -v size="$rev_file_size" 'BEGIN {printf "%.2f", size / (1024*1024)}')
         echo $rev_file_size_mb > rev_size.txt
 
-        echo "cat rev reads: cat $rev_read >> $rev_read_name" 
-        cat $rev_read >> ${rev_read_name}
+        echo "cat rev reads: cat $rev_read >> ~{read2_name}" 
+        cat $rev_read >> ~{read2_name}
 
       fi
     done
@@ -140,10 +142,8 @@ task fetch_bs {
 
   >>>
   output {
-    String r1 = read_string("fwd_read_name.txt")
-    String r2 = read_string("rev_read_name.txt")
-    File read1  = r1
-    File? read2 = r2
+    File read1  = read1_name
+    File? read2 = read2_name
     
     Float fwd_file_size = read_float("fwd_size.txt")
     Float rev_file_size = read_float("rev_size.txt")
@@ -169,6 +169,8 @@ workflow basespace_fetch {
     String basespace_collection_id 
     String api_server
     String access_token
+    String read1_name
+    String read2_name
   
   }
 
@@ -180,6 +182,8 @@ workflow basespace_fetch {
       basespace_collection_id = basespace_collection_id,
       api_server = api_server,
       access_token = access_token
+      read1_name = read1_name
+      read2_name = read2_name
   }
 
   # call version_capture {
