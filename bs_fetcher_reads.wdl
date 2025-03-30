@@ -227,7 +227,7 @@ workflow FetchReads {
             api_server = api_server,
             access_token = access_token,
             read1_name = GetReadsName.read1_whole_name,
-            read2_name = GetReadsName.read1_whole_name
+            read2_name = GetReadsName.read2_whole_name
     }
 
   # call version_capture {
