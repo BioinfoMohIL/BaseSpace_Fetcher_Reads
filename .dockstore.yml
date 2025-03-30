@@ -1,5 +1,5 @@
 version: 1.2
 workflows:
- - name: BaseSpace_Fetcher_Reads
+ - name: BaseSpace_Fetcher_Reads_MOH
    subclass: WDL
    primaryDescriptorPath: /bs_fetcher_reads.wdl
