@@ -215,11 +215,11 @@ task ImportReadsFromBS {
 
 workflow FetchReads {
     input {
-        String sample_name = "M13_37"
-        String basespace_sample_name = "M13_37"
-        String basespace_collection_id = "N_019"
-        String api_server = "https://api.basespace.illumina.com"
-        String access_token = "4acb4557c76940d99ed57dfd3212d423"
+        String sample_name
+        String basespace_sample_name
+        String basespace_collection_id
+        String api_server
+        String access_token
 
     }
 
