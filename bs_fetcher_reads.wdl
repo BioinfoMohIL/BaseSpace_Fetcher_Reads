@@ -254,8 +254,8 @@ workflow FetchReads {
         File read1    = ImportReadsFromBS.read1
         File? read2   = ImportReadsFromBS.read2
 
-        Float read1_file_size_MB = ImportReadsFromBS.fwd_file_size
-        Float read2_file_size_MB = ImportReadsFromBS.rev_file_size
+        Float read1_file_size_mb = ImportReadsFromBS.fwd_file_size
+        Float read2_file_size_mb = ImportReadsFromBS.rev_file_size
 
     }
 
