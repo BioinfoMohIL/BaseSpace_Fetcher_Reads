@@ -94,23 +94,27 @@ task GetReadsName {
         # rename FASTQ files to add back in underscores that Illumina/Basespace changed into hyphens
         echo "Concatenating and renaming FASTQ files to add back underscores in basespace_sample_name"
         # setting a new bash variable to use for renaming during concatenation of FASTQs
-        SAMPLENAME_HYPHEN_INSTEAD_OF_UNDERSCORES=$(echo $sample_identifier | sed 's|_|-|g' | sed 's|\.|-|g')
+        # SAMPLENAME_HYPHEN_INSTEAD_OF_UNDERSCORES=$(echo $sample_identifier | sed 's|_|-|g' | sed 's|\.|-|g')
 
-        echo $SAMPLENAME_HYPHEN_INSTEAD_OF_UNDERSCORES > 'sample_id.txt'
+        # echo $SAMPLENAME_HYPHEN_INSTEAD_OF_UNDERSCORES > 'sample_id.txt'
+
+        echo $sample_identifier > 'sample_id.txt'
  
 
-        for fwd_read in ./dataset_*/${SAMPLENAME_HYPHEN_INSTEAD_OF_UNDERSCORES}_*R1_*.fastq.gz; do
+        for fwd_read in ./dataset_*/${sample_identifier}_*R1_*.fastq.gz; do
             if [[ -s $fwd_read ]]; then
                 read1_name=$(basename "$fwd_read")
+
                 echo ${read1_name} > read1_name.txt
                 cat $fwd_read      > fwd.fastq.gz
                 
             fi
         done
 
-        for rev_read in ./dataset_*/${SAMPLENAME_HYPHEN_INSTEAD_OF_UNDERSCORES}_*R2_*.fastq.gz; do
+        for rev_read in ./dataset_*/${sample_identifier}_*R2_*.fastq.gz; do
             if [[ -s $rev_read ]]; then
                 read2_name=$(basename "$rev_read")
+
                 echo ${read2_name} > read2_name.txt
                 cat $rev_read      > rev.fastq.gz
             fi
@@ -211,11 +215,11 @@ task ImportReadsFromBS {
 
 workflow FetchReads {
     input {
-        String sample_name
-        String basespace_sample_name
-        String basespace_collection_id
-        String api_server
-        String access_token
+        String sample_name = "M13_37"
+        String basespace_sample_name = "M13_37"
+        String basespace_collection_id = "N_019"
+        String api_server = "https://api.basespace.illumina.com"
+        String access_token = "4acb4557c76940d99ed57dfd3212d423"
 
     }
 
