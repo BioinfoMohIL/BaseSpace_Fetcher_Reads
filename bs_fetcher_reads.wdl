@@ -134,9 +134,9 @@ task fetch_bs {
 
     # rename FASTQ files to add back in underscores that Illumina/Basespace changed into hyphens
     echo "Concatenating and renaming FASTQ files to add back underscores in basespace_sample_name"
+   
     # setting a new bash variable to use for renaming during concatenation of FASTQs
-    SAMPLENAME_HYPHEN_INSTEAD_OF_UNDERSCORES=$(echo $sample_identifier | sed 's|_|-|g' | sed 's|\.|-|g')
-
+    SAMPLENAME_HYPHEN_INSTEAD_OF_UNDERSCORES="CB567_r1"
     #Combine non-empty read files into single file without BaseSpace filename cruft
     ##FWD Read
     lane_count=0
@@ -167,7 +167,7 @@ task fetch_bs {
     }
 
     fwd_total_file="fwd_size.txt"
-    for fwd_read in ./dataset_*/${SAMPLENAME_HYPHEN_INSTEAD_OF_UNDERSCORES}_*R1_*.fastq.gz; do
+    for fwd_read in ./dataset_*/${sample_identifier}_*R1_*.fastq.gz; do
       
       if [ ! -s "$fwd_total_file" ]; then
         echo "0" > "$fwd_total_file"
@@ -182,7 +182,7 @@ task fetch_bs {
 
     ##REV Read
     rev_total_file="rev_size.txt"
-    for rev_read in ./dataset_*/${SAMPLENAME_HYPHEN_INSTEAD_OF_UNDERSCORES}_*R2_*.fastq.gz; do
+    for rev_read in ./dataset_*/${sample_identifier}_*R2_*.fastq.gz; do
       if [[ -s $rev_read ]]; then 
         accumulate_mb "$rev_read" "$rev_total_file"
 
