@@ -33,6 +33,9 @@ workflow basespace_fetch {
 
     Float read1_file_size_mb = fetch_bs.fwd_file_size
     Float read2_file_size_mb = fetch_bs.rev_file_size
+
+    Float bs_read1_file_size_mb = fetch_bs.bs_fwd_file_size
+    Float bs_read2_file_size_mb = fetch_bs.bs_rev_file_size
   }
 }
 
@@ -75,10 +78,11 @@ task fetch_bs {
     String access_token
     
     Int memory = 8
-    Int cpu = 2
+    Int cpu = 4
     Int disk_size = 100
 
-    String docker = "us-docker.pkg.dev/general-theiagen/theiagen/basespace_cli:1.2.1"
+    # String docker = "us-docker.pkg.dev/general-theiagen/theiagen/basespace_cli:1.2.1"
+    String docker = "bioinfomoh/basespace-cli:1.6.2"
   }
   meta {
     # added so that call caching is always turned off
@@ -123,6 +127,7 @@ task fetch_bs {
       fi      
     fi
 
+
     #Download reads by dataset ID
     for index in ${!dataset_id_array[@]}; do
       dataset_id=${dataset_id_array[$index]}
@@ -132,20 +137,61 @@ task fetch_bs {
       echo -e "downloaded data: \n $(ls ./dataset_*/*)"
     done
 
+    # Fetch BS file size form CLI to compare with the actual file size fetched
+    # Initialize total files if missing
+    bs_r1_total_file_size='bs_read1_file_size.txt'
+    bs_r2_total_file_size='bs_read2_file_size.txt'
+
+    [ ! -s "$bs_r1_total_file_size" ] && echo "0" > "$bs_r1_total_file_size"
+    [ ! -s "$bs_r2_total_file_size" ] && echo "0" > "$bs_r2_total_file_size"
+
+    for dataset_id in "${dataset_id_array[@]}"; do
+
+      # Fetch sizes into arrays
+      r1_size_list=($(
+        ${bs_command} dataset content -i "${dataset_id}" -F Size -F Name \
+          | awk -F"|" '/_R1_.*fastq\.gz/ {
+              gsub(/ /, "", $2);
+              printf "%.2f\n", $2 / 1048576;
+            }'
+      ))
+
+
+      r2_size_list=($(
+        ${bs_command} dataset content -i "${dataset_id}" -F Size -F Name \
+          | awk -F"|" '/_R2_.*fastq\.gz/ {
+              gsub(/ /, "", $2);
+              printf "%.2f\n", $2 / 1048576;
+            }'
+      ))
+
+      # Sum R1 sizes
+      r1_sum=$(awk "BEGIN {total=0; for(i in ARGV) if(i>0) total+=ARGV[i]; print total}" "${r1_size_list[@]}")
+      prev_r1_total=$(cat "$bs_r1_total_file_size")
+      new_r1_total=$(awk "BEGIN {printf \"%.2f\", $r1_sum + $prev_r1_total}")
+
+      echo "$new_r1_total" > "$bs_r1_total_file_size"
+
+      # Sum R2 sizes
+      r2_sum=$(awk "BEGIN {total=0; for(i in ARGV) if(i>0) total+=ARGV[i]; print total}" "${r2_size_list[@]}")
+      prev_r2_total=$(cat "$bs_r2_total_file_size")
+      new_r2_total=$(awk "BEGIN {printf \"%.2f\", $r2_sum + $prev_r2_total}")
+      echo "$new_r2_total" > "$bs_r2_total_file_size"
+
+    done
+
+
     # rename FASTQ files to add back in underscores that Illumina/Basespace changed into hyphens
     echo "Concatenating and renaming FASTQ files to add back underscores in basespace_sample_name"
    
-    # setting a new bash variable to use for renaming during concatenation of FASTQs
-    SAMPLENAME_HYPHEN_INSTEAD_OF_UNDERSCORES=""
     #Combine non-empty read files into single file without BaseSpace filename cruft
     ##FWD Read
     lane_count=0
 
-    accumulate_mb() {
+    calcul_total_size() {
       local file="$1"
       local total_file="$2"
 
-      # Initialize total file if missing or empty
       if [ ! -s "$total_file" ]; then
         echo "0" > "$total_file"
       fi
@@ -166,37 +212,46 @@ task fetch_bs {
       echo "$new_total" > "$total_file"
     }
 
-    fwd_total_file="fwd_size.txt"
-    for fwd_read in ./dataset_*/${sample_identifier}_*R1_*.fastq.gz; do
-      
-      if [ ! -s "$fwd_total_file" ]; then
-        echo "0" > "$fwd_total_file"
-      fi
+    process_reads() {
+        local sample_id="$1"       
+        local sample_name="$2"     
+        local read_dir="$3"       
+        local total_file            # cumulative on-disk size
+        local bs_total_file         # BioSample-reported size
+        local lane_count=0
 
-      accumulate_mb "$fwd_read" "$fwd_total_file"
+        total_file="${read_dir}_size.txt"        
+        bs_total_file="bs_${read_dir}_size.txt"   
 
-      echo "cat fwd reads: cat $fwd_read >> ~{sample_name}_R1.fastq.gz" 
-      cat $fwd_read >> ~{sample_name}_R1.fastq.gz
-      lane_count=$((lane_count+1))
-    done
+        [ ! -s "$total_file" ]    && echo "0" > "$total_file"
+        for fq in ./dataset_*/${sample_id}_*${read_dir}_*.fastq.gz; do
 
-    ##REV Read
-    rev_total_file="rev_size.txt"
-    for rev_read in ./dataset_*/${sample_identifier}_*R2_*.fastq.gz; do
-      if [[ -s $rev_read ]]; then 
-        accumulate_mb "$rev_read" "$rev_total_file"
+          calcul_total_size "$fq" "$total_file"
 
-        echo "cat rev reads: cat $rev_read >> ~{sample_name}_R2.fastq.gz" 
-        cat $rev_read >> ~{sample_name}_R2.fastq.gz
-      fi
-    done
+          # append to the merged-fastq
+          echo "cat $fq >> ${sample_name}_${read_dir}.fastq.gz"
+          cat "$fq" >> "${sample_name}_${read_dir}.fastq.gz"
+
+          lane_count=$((lane_count + 1))
+        done
+
+        echo "Processed $lane_count lanes for ${read_dir} of sample ${sample_id}."
+        }
+
+    process_reads ${sample_identifier} ${sample_identifier} "R1"
+    process_reads ${sample_identifier} ${sample_identifier} "R2"
+
+
+    
     echo "Lane Count: ${lane_count}"
   >>>
   output {
     File read1 = "~{sample_name}_R1.fastq.gz"
     File? read2 = "~{sample_name}_R2.fastq.gz"
-    Float fwd_file_size = read_float("fwd_size.txt")
-    Float rev_file_size = read_float("rev_size.txt")
+    Float fwd_file_size = read_float("R1_size.txt")
+    Float rev_file_size = read_float("R2_size.txt")
+    Float bs_fwd_file_size = read_float("bs_read1_file_size.txt")
+    Float bs_rev_file_size = read_float("bs_read2_file_size.txt")
   }
 
   runtime {
