@@ -136,7 +136,7 @@ task fetch_bs {
     echo "Concatenating and renaming FASTQ files to add back underscores in basespace_sample_name"
    
     # setting a new bash variable to use for renaming during concatenation of FASTQs
-    SAMPLENAME_HYPHEN_INSTEAD_OF_UNDERSCORES="CB567_r1"
+    SAMPLENAME_HYPHEN_INSTEAD_OF_UNDERSCORES=""
     #Combine non-empty read files into single file without BaseSpace filename cruft
     ##FWD Read
     lane_count=0
