@@ -226,12 +226,13 @@ task fetch_bs {
         [ ! -s "$total_file" ]    && echo "0" > "$total_file"
         for fq in ./dataset_*/${sample_id}_*${read_dir}_*.fastq.gz; do
 
-          calcul_total_size "$fq" "$total_file"
 
           # append to the merged-fastq
-          echo "cat $fq >> ${sample_name}_${read_dir}.fastq.gz"
-          cat "$fq" >> "${sample_name}_${read_dir}.fastq.gz"
+          read_file="${sample_name}_${read_dir}.fastq.gz"
+          echo "cat $fq >> ${read_file}"
+          cat "$fq" >> "${read_file}"
 
+          calcul_total_size "$read_file" "$total_file"
           lane_count=$((lane_count + 1))
         done
 
